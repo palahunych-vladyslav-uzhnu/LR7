@@ -1,1 +1,331 @@
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ЛР №7 - Фітнес-Студія (Grid + Flex)</title>
 
+    <style>
+        /* ================================================= */
+        /* 1. CSS Змінні (Variables) */
+        /* ================================================= */
+        :root {
+            --color-primary: #12b073;    /* Свіжий зелений акцент */
+            --color-secondary: #0f8f5d;  /* Темніший зелений */
+            --color-text: #333;
+            --color-bg: #f7f7f7;
+            --gap: 20px;                 /* Змінна для відступів */
+            --radius: 8px;
+            --elev-light: 4px 4px 10px rgba(0, 0, 0, 0.1); /* Змінна для тіні (низька інтенсивність) */
+            --elev-medium: 0 8px 15px rgba(0, 0, 0, 0.2);  /* Змінна для тіні (середня інтенсивність) */
+        }
+
+        /* Базові стилі */
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            background-color: var(--color-bg);
+            color: var(--color-text);
+            line-height: 1.6;
+            min-height: 100vh;
+            display: grid; /* Встановлюємо body як Grid-контейнер для фіксованого footer */
+            grid-template-rows: auto 1fr auto;
+        }
+
+        /* ================================================= */
+        /* 2. Grid Макет Сторінки (Семантичні зони) */
+        /* ================================================= */
+
+        .grid-container {
+            display: grid;
+            /* Іменування зон: header, content (main + aside), footer */
+            grid-template-areas:
+                "header header"
+                "main aside"
+                "footer footer";
+            /* Визначення розмірів колонок: широка main (3/4) і вузька aside (1/4) */
+            grid-template-columns: 3fr 1fr; 
+            gap: var(--gap);
+            padding: var(--gap);
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        header {
+            grid-area: header;
+            background: var(--color-primary);
+            color: white;
+            padding: 30px;
+            text-align: center;
+        }
+
+        main {
+            grid-area: main;
+            padding: 20px;
+            background: white;
+            border-radius: var(--radius);
+        }
+
+        aside {
+            grid-area: aside;
+            padding: 20px;
+            background: #e0ffe0; /* Світліший фон для aside */
+            border-radius: var(--radius);
+            box-shadow: var(--elev-light); /* Використання змінної тіні */
+        }
+
+        footer {
+            grid-area: footer;
+            background: var(--color-secondary);
+            color: white;
+            padding: 15px;
+            text-align: center;
+            margin-top: var(--gap);
+        }
+
+        /* ================================================= */
+        /* 3. Flexbox Стилізація Контенту (всередині main) */
+        /* ================================================= */
+
+        /* 3.1. Горизонтальний блок "Тарифи" (3 картки) */
+        .tariffs-block {
+            display: flex;
+            justify-content: space-between;
+            gap: var(--gap);
+            margin-bottom: 40px;
+        }
+
+        .tariff-card {
+            flex: 1; /* Рівна ширина для 3 карток */
+            background: var(--color-bg);
+            padding: 20px;
+            border-radius: var(--radius);
+            text-align: center;
+            box-shadow: var(--elev-light);
+            transition: box-shadow 0.3s;
+        }
+        
+        .tariff-card:hover {
+            box-shadow: var(--elev-medium); /* Зміна тіні при hover */
+        }
+        
+        .tariff-card button {
+            background: var(--color-primary);
+            color: white;
+            padding: 10px 20px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            margin-top: 15px;
+            font-weight: bold;
+        }
+
+        /* 3.2. Секція Тренерів (флекс-решітка з перенесенням) */
+        .trainers-grid {
+            display: flex;
+            flex-wrap: wrap; /* Перенесення карток */
+            gap: var(--gap);
+            justify-content: space-around; /* Вирівнювання по центру */
+        }
+
+        .trainer-card {
+            width: 200px; /* Фіксована ширина елементів у решітці */
+            background: #f0f0f0;
+            padding: 15px;
+            border-radius: var(--radius);
+            text-align: center;
+            margin-bottom: 10px;
+        }
+
+        .trainer-card img {
+            width: 100%;
+            height: 150px;
+            object-fit: cover;
+            border-radius: 50%;
+            margin-bottom: 10px;
+        }
+
+        /* ================================================= */
+        /* 4. Кастомне Модальне Вікно (Overlay) */
+        /* ================================================= */
+        
+        /* Стилізація Overlay */
+        .modal-overlay {
+            display: none; /* Приховано за замовчуванням */
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.7);
+            z-index: 1000;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .modal-content {
+            background: white;
+            padding: 40px;
+            border-radius: var(--radius);
+            width: 90%;
+            max-width: 500px;
+            box-shadow: var(--elev-medium);
+            position: relative;
+        }
+
+        .close-btn {
+            position: absolute;
+            top: 10px;
+            right: 15px;
+            font-size: 24px;
+            cursor: pointer;
+            border: none;
+            background: none;
+            color: var(--color-text);
+        }
+
+        /* ================================================= */
+        /* 5. Адаптивність (Media Query) */
+        /* ================================================= */
+
+        @media (max-width: 768px) {
+            .grid-container {
+                /* На вузьких екранах переходимо до однієї колонки */
+                grid-template-areas:
+                    "header header"
+                    "main main"
+                    "aside aside"
+                    "footer footer";
+                grid-template-columns: 1fr;
+            }
+
+            .tariffs-block {
+                /* Картки тарифів йдуть вертикально, щоб уникнути стиснення */
+                flex-direction: column;
+            }
+            
+            /* Зменшення відступів для мобільних */
+            :root {
+                --gap: 10px;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <div class="grid-container">
+        
+        <header>
+            <h1>💪 Фітнес-Студія "Iron Will"</h1>
+            <nav>
+                <a href="#">Головна</a> | <a href="#">Тренери</a> | <a href="#">Тарифи</a>
+            </nav>
+        </header>
+
+        <main>
+            <h2>Наші Тарифи</h2>
+            <div class="tariffs-block">
+                <div class="tariff-card">
+                    <h3>Базовий</h3>
+                    <p>Доступ до залу.</p>
+                    <p style="font-weight: bold; color: var(--color-primary);">500 грн/міс</p>
+                    <button>Обрати</button>
+                </div>
+                <div class="tariff-card">
+                    <h3>Стандарт</h3>
+                    <p>Зал + 2 групові тренування.</p>
+                    <p style="font-weight: bold; color: var(--color-primary);">800 грн/міс</p>
+                    <button>Обрати</button>
+                </div>
+                <div class="tariff-card">
+                    <h3>Преміум</h3>
+                    <p>Зал + безлімітні групові тренування.</p>
+                    <p style="font-weight: bold; color: var(--color-primary);">1200 грн/міс</p>
+                    <button class="open-modal-btn">Бронювання</button>
+                </div>
+            </div>
+
+            <h2>Наша Команда (Тренери)</h2>
+            <div class="trainers-grid">
+                <div class="trainer-card">
+                    <img src="trainer1.jpg" alt="Тренер Анна">
+                    <h4>Анна Р.</h4>
+                    <p>Силові тренування</p>
+                </div>
+                <div class="trainer-card">
+                    <img src="trainer2.jpg" alt="Тренер Максим">
+                    <h4>Максим В.</h4>
+                    <p>Кросфіт</p>
+                </div>
+                <div class="trainer-card">
+                    <img src="trainer3.jpg" alt="Тренер Олена">
+                    <h4>Олена Т.</h4>
+                    <p>Йога та Пілатес</p>
+                </div>
+                <div class="trainer-card">
+                    <img src="trainer4.jpg" alt="Тренер Ігор">
+                    <h4>Ігор К.</h4>
+                    <p>Кардіо</p>
+                </div>
+            </div>
+        </main>
+
+        <aside>
+            <h2>Розклад на Тиждень</h2>
+            <ul>
+                <li>Пн, 19:00 - Кросфіт</li>
+                <li>Вт, 18:30 - Йога</li>
+                <li>Ср, 10:00 - Силові</li>
+                <li>Пт, 17:00 - Кардіо</li>
+            </ul>
+            <button class="open-modal-btn" style="margin-top: 20px;">Записатися зараз!</button>
+        </aside>
+
+        <footer>
+            Контакти | Політика конфіденційності | &copy; 2025 Iron Will
+        </footer>
+    </div>
+    
+    <div id="bookingModal" class="modal-overlay">
+        <div class="modal-content">
+            <button class="close-btn">&times;</button>
+            <h3>✍️ Запис на Тренування</h3>
+            <form>
+                <label for="name">Ім'я:</label>
+                <input type="text" id="name" required><br><br>
+                <label for="email">Email:</label>
+                <input type="email" id="email" required><br><br>
+                <label for="training">Оберіть тип:</label>
+                <select id="training" required>
+                    <option value="group">Групове</option>
+                    <option value="personal">Персональне</option>
+                </select><br><br>
+                <button type="submit" style="background: var(--color-secondary);">Надіслати запис</button>
+            </form>
+        </div>
+    </div>
+    
+    <script>
+        const modal = document.getElementById('bookingModal');
+        const openBtns = document.querySelectorAll('.open-modal-btn');
+        const closeBtn = document.querySelector('.close-btn');
+
+        openBtns.forEach(btn => {
+            btn.addEventListener('click', () => {
+                modal.style.display = 'flex';
+            });
+        });
+
+        closeBtn.addEventListener('click', () => {
+            modal.style.display = 'none';
+        });
+
+        modal.addEventListener('click', (e) => {
+            if (e.target === modal) {
+                modal.style.display = 'none';
+            }
+        });
+    </script>
+
+</body>
+</html>
